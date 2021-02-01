@@ -265,6 +265,11 @@ class Buffer {
   mergeImages(videoTargetCanvas, color) {
     return mergeImages(this.buffer, videoTargetCanvas, color);
   }
+  delete() {
+    this.buffer.delete();
+    this.rescaled.delete();
+    this.digits.delete();
+  }
 }
 
 class Board {
