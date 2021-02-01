@@ -126,6 +126,7 @@ class Camera {
   async on() {
     await initSolverModule();
     await initTensorflowModel();
+    console.log(solver);console.log(model);
     await navigator.mediaDevices.getUserMedia({audio: false, video: {facingMode: "environment"}})
       .then(stream => {
         const videoSettings = stream.getVideoTracks()[0].getSettings();
