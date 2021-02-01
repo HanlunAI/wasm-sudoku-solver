@@ -12,7 +12,6 @@
   *,*::before,*::after {
     box-sizing: border-box;
     text-align: center;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
   }
   menu,ul,ol {
     margin:0;padding:0;
@@ -26,6 +25,7 @@
   header {
     border-bottom:hsl(300,40%,30%) solid .3em;
     margin-bottom:2em;
+    padding:1em 0;
     background:hsl(300,40%,60%);
     color:white;
   }
@@ -52,12 +52,20 @@
   }
   header h2+div>* {
     text-align: justify;
+    font-size:1.2em;
   }
   h1 {
     padding:.2em 0;
     border-top:4px solid hsl(300,40%,30%);
     border-bottom:4px solid hsl(300,40%,30%);
     margin-bottom:.2em;
+    font-size:2em;
+  }
+  h2 {
+    font-size:1.5em;
+  }
+  h1+p {
+    font-size:1.2em;
   }
   html,body {
     height:100%;
@@ -106,7 +114,7 @@
     text-align: right;
   }
  #message {
-    font-size:1em;
+    font-size:1.2em;
     background:hsl(300,40%,80%);
     text-align: center;
     border-radius:1.1em;
