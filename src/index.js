@@ -201,6 +201,7 @@ class Processor {
     buffer.renderDigits(colorRaw).renderStep(4).copyAndProject2(Buffer.square(180, -2))
         .renderStep(4).rescale(canvas.width)
         .renderStep(5).mergeImages(canvas, color);
+    buffer.delete();
   }
 }
 class Buffer {
