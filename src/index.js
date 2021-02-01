@@ -185,7 +185,7 @@ class Processor {
         .renderStep(2).removeGridlines()
         .renderStep(3).matchDigits();
 
-    console.log(buffer.puzzle);
+    //console.log(buffer.puzzle);
     if (buffer.puzzle)
       state('found');
     else
