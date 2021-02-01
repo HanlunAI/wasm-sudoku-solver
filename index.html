@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanlun AI Sudoku Solver</title>
+<script src="./lib/opencv.js"></script>
+<script src="./lib/tfjs.js"></script>
+<script src="./lib/tfjs-backend-wasm.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;600&display=swap" rel="stylesheet">
+
+<style type="text/css">
+  *,*::before,*::after {
+    box-sizing: border-box;
+    text-align: center;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+  }
+  menu,ul,ol {
+    margin:0;padding:0;
+    list-style:none;
+  }
+  :root {
+    background:hsl(320,40%,90%);
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight:400;
+  }
+  header {
+    border-bottom:hsl(300,40%,30%) solid .3em;
+    margin-bottom:2em;
+    background:hsl(300,40%,60%);
+    color:white;
+  }
+  header>div {
+    display:flex;justify-content:center;flex-wrap:wrap;
+    max-width:600px;
+    margin:auto;
+  }
+  h1,h2 {
+    font-weight:600;
+  }
+  h2::before {
+    background:hsl(320,40%,90%);
+    border-radius:9em;
+    display:block;
+    width:1.5em;height:1.5em;line-height:1.5em;
+    margin-bottom:.1em;
+  }
+  header h2+div {
+    flex-grow:1;
+    max-width:400px;
+    margin:0 1.5em;
+    line-height:1.5;
+  }
+  header h2+div>* {
+    text-align: justify;
+  }
+  h1 {
+    padding:.2em 0;
+    border-top:4px solid hsl(300,40%,30%);
+    border-bottom:4px solid hsl(300,40%,30%);
+    margin-bottom:.2em;
+  }
+  html,body {
+    height:100%;
+    margin:0;
+  }
+  #cam,#grid,input[type=radio] {
+    display:none;
+  }
+  #show-cam:checked~#cam,#show-grid:checked~#grid {
+    display:block;
+  }
+  menu {
+    display:flex;justify-content:center;flex-wrap:wrap;
+  }
+  menu label {
+    display:inline-block;
+    width:10em;
+    font-size:1.2em;
+    background:linear-gradient(135deg, hsl(320,50%,80%), hsl(320,50%,50%));
+    color:white;
+    padding: .5em;margin:.5em;
+    cursor:pointer;
+    border-radius:.5em;
+    text-align:center;
+  }
+  [data-icon]::before {
+    content:attr(data-icon);
+    font-size:4em;
+    display:block;
+  }
+  details {
+    position:absolute;right:0;top:0;
+    background:orchid;
+    color:black;
+    padding:.5em;
+  }
+  input[type=color] {
+    margin-left:.5em;
+  }
+  #grid {
+    font-size:1.6em;
+    width:14em;
+    margin:.5em auto;
+  }
+  #grid div:first-of-type {
+    text-align: right;
+  }
+ #message {
+    font-size:1em;
+    background:hsl(300,40%,80%);
+    text-align: center;
+    border-radius:1.1em;
+    padding:.5em;margin:1em auto;
+    width:95%;max-width:700px;
+  }
+  #grid button {
+    background:none;border:none;
+    font-size:1.2em;
+  }
+  input[type=number] {
+    width:1.5em;height:1.5em;
+    font-size:1em;
+    border:1px silver solid;
+    background:transparent;
+  }
+  input[type=number]:nth-child(-n+9) {
+    border-top:2px black solid;
+  }
+  input[type=number]:nth-child(n+28):nth-child(-n+36),
+  input[type=number]:nth-child(n+55):nth-child(-n+63) {
+    border-top:1px black solid;
+  }
+  input[type=number]:nth-child(n+73) {
+    border-bottom:2px black solid;
+  }
+  input[type=number]:nth-child(9n+1) {
+    border-left:2px black solid;
+  }
+  input[type=number]:nth-child(9n+4),
+  input[type=number]:nth-child(9n+7) {
+    border-left:1px black solid;
+  }
+  input[type=number]:nth-child(9n) {
+    border-right:2px black solid;
+  }
+  input[type=number].sol {
+    color:var(--user);
+  }
+  ::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  canvas {
+    width:100%;
+    margin:0 auto;
+  }
+  aside {
+    padding:1em;
+    max-width:800px;
+    margin:2em auto 0 auto;
+    text-align: justify;
+    background:silver;
+  }
+</style>
+
+<header>
+  <div>
+    <h2 data-icon="👁️">AI Vision</h2>
+    <div>
+      <h1>Sudoku Solver</h1>
+      <p>By clicking 'Live camera' below and showing a sudoku puzzle to your device camera, AI vision technology will automatically detect the sudoku grid and fill the empty boxes.</p>
+    </div>
+  </div>
+</header>
+
+<input id="show-cam" name="means" type="radio">
+<input id="show-grid" name="means" type="radio">
+
+<menu>
+  <li><label data-icon="📷" for="show-cam">Live camera</label></li>
+  <li hidden><label data-icon="🖼️" for="upload">Image upload</label><input id=upload type=file accept="image/png,image/jpeg" hidden></li>
+  <li><label data-icon="⌨️" for="show-grid">Manual input</label></li>
+</menu>
+
+<details>
+  <summary>UI Preference</summary>
+  <label>Solution color<input type=color value=#bb12bb></label>
+</details>
+
+
+<p id=message>Select 1 of the above</p>
+<section id=grid>
+  <div>
+    <button id=sample>O</button>
+    <button id=clear>❌</button>
+  </div>
+  <div></div>
+</section>
+
+<div id="cam">
+  <canvas id="tempCanvas" style="display: none;"></canvas>
+  <video id="videoElement" height="0" autoplay="" playsinline=""></video>
+  <input type="range" id="range" min="0" max="6" value="6" hidden />
+</div>
+
+<canvas hidden></canvas>
+
+<aside>
+    This solver is based on <a href="https://github.com/ColinEberhardt/wasm-sudoku-solver" target="_blank">this github repository by Colin Edberhardt</a>, which was retrained by us to improve accuracy and speed.
+  <br>2021, Hanlun AI Limited.
+</aside>
+
+<script type="module">
+  import "./src/index.js";
+</script>
+
+<script nomodule type="text/javascript">
+  document.getElementById("browser").style.display = "block";
+</script>
